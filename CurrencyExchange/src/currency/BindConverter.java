@@ -1,4 +1,6 @@
-public class Converter extends org.jdesktop.beansbinding.Converter<String, String>{
+package currency;
+
+public class BindConverter extends org.jdesktop.beansbinding.Converter<String, String>{
 	
 	@Override
 	public String convertForward(String arg0) {

@@ -1,5 +1,5 @@
-import java.io.BufferedReader;
-import java.io.InputStreamReader;
+package currency;
+
 import java.net.HttpURLConnection;
 import java.net.MalformedURLException;
 import java.net.ProtocolException;
@@ -16,7 +16,7 @@ public class HttpHandler {
 		endpointUrl = url;
 	}
 	
-	public void load() throws ProtocolException {
+	public void load() throws IOException {
 		StringBuilder result = new StringBuilder();
 	    
 	    BufferedReader rd = new BufferedReader(getStream());
@@ -32,7 +32,7 @@ public class HttpHandler {
 		return new JSONObject(data);
 	}
 	
-	private InputStreamReader getStream() {
+	private InputStreamReader getStream() throws IOException {
 		URL url;
 		url = new URL(endpointUrl);
 	    HttpURLConnection conn = (HttpURLConnection) url.openConnection();

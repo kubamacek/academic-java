@@ -1,10 +1,12 @@
+package currency;
+
 import org.json.*;
 
 
 public class JsonParser {
 	private JSONObject json;
 	
-	public Parser(JSONObject object) {
+	public void Parser(JSONObject object) {
 		json = object;
 	}
 	

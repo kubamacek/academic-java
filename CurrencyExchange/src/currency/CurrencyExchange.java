@@ -21,10 +21,18 @@ import javax.swing.JTextPane;
 import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import java.awt.Font;
+import javax.swing.SwingConstants;
 
 public class CurrencyExchange extends JFrame {
 
 	private JPanel contentPane;
+	private JTextField txtConvertFrom;
+	private JTextField txtConvertTo;
+	private JTextField txtPLN;
+	private JTextField txtLoadData_converter;
+	private JTextField txtDeleteData_converter;
+	private JTextField txtLoadData_viewer;
+	private JTextField txtDeleteData_viewer;
 
 	/**
 	 * Launch the application.
@@ -35,6 +43,7 @@ public class CurrencyExchange extends JFrame {
 				try {
 					CurrencyExchange frame = new CurrencyExchange();
 					frame.setVisible(true);
+					frame.setTitle("CurrencyExchange");
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -65,39 +74,62 @@ public class CurrencyExchange extends JFrame {
 		JPanel appConverter = new JPanel();
 		appConverter.setBackground(Color.LIGHT_GRAY);
 		dashboard.add(appConverter, "name_714925199361600");
-		appConverter.setLayout(new MigLayout("", "[grow][grow][grow]", "[][][grow][grow][][][]"));
+		appConverter.setLayout(new MigLayout("", "[125px,grow][125px,grow][125px,grow]", "[grow][grow][][]"));
 		
-		JTextPane textPane_2 = new JTextPane();
-		appConverter.add(textPane_2, "cell 0 2,growx");
+		txtConvertFrom = new JTextField();
+		txtConvertFrom.setEditable(false);
+		txtConvertFrom.setText("Convert from:");
+		appConverter.add(txtConvertFrom, "cell 0 0,growx,aligny bottom");
+		txtConvertFrom.setColumns(10);
 		
-		JComboBox comboBox = new JComboBox();
-		appConverter.add(comboBox, "cell 1 2,growx");
+		txtPLN = new JTextField();
+		txtPLN.setEditable(false);
+		txtPLN.setHorizontalAlignment(SwingConstants.CENTER);
+		txtPLN.setText("PLN");
+		appConverter.add(txtPLN, "cell 1 0,growx,aligny bottom");
+		txtPLN.setColumns(10);
 		
-		JTextPane textPane = new JTextPane();
-		appConverter.add(textPane, "cell 2 2,growx");
+		JTextPane value_PLN = new JTextPane();
+		appConverter.add(value_PLN, "cell 2 0,growx,aligny bottom");
 		
-		JTextPane textPane_3 = new JTextPane();
-		appConverter.add(textPane_3, "cell 0 3,growx");
+		txtConvertTo = new JTextField();
+		txtConvertTo.setEditable(false);
+		txtConvertTo.setText("Convert to:\r\n");
+		appConverter.add(txtConvertTo, "cell 0 1,growx,aligny top");
+		txtConvertTo.setColumns(10);
 		
-		JComboBox comboBox_1 = new JComboBox();
-		appConverter.add(comboBox_1, "cell 1 3,growx");
+		JComboBox selectCurrency = new JComboBox();
+		appConverter.add(selectCurrency, "cell 1 1,growx,aligny top");
 		
-		JTextPane textPane_1 = new JTextPane();
-		appConverter.add(textPane_1, "cell 2 3,growx");
+		JTextPane value_Converted = new JTextPane();
+		appConverter.add(value_Converted, "cell 2 1,growx,aligny top");
 		
-		JButton btnNewButton = new JButton("Get data from API");
-		appConverter.add(btnNewButton, "cell 0 6,alignx center");
+		txtLoadData_converter = new JTextField();
+		txtLoadData_converter.setEditable(false);
+		txtLoadData_converter.setText("Load data from DB...");
+		appConverter.add(txtLoadData_converter, "cell 1 2,growx");
+		txtLoadData_converter.setColumns(10);
 		
-		JButton btnNewButton_1 = new JButton("Load DB");
-		appConverter.add(btnNewButton_1, "cell 1 6,alignx center");
+		txtDeleteData_converter = new JTextField();
+		txtDeleteData_converter.setEditable(false);
+		txtDeleteData_converter.setText("Delete data from DB...");
+		txtDeleteData_converter.setColumns(10);
+		appConverter.add(txtDeleteData_converter, "cell 2 2,growx");
 		
-		JButton btnNewButton_2 = new JButton("Delete DB");
-		appConverter.add(btnNewButton_2, "cell 2 6,alignx center");
+		JButton btnGetFromAPI_converter = new JButton("Get data from API");
+		appConverter.add(btnGetFromAPI_converter, "cell 0 3,growx");
+		
+		JComboBox selectToLoad_converter = new JComboBox();
+		selectToLoad_converter.setToolTipText("Load from DB...");
+		appConverter.add(selectToLoad_converter, "cell 1 3,growx");
+		
+		JComboBox selectToDelete_converter = new JComboBox();
+		appConverter.add(selectToDelete_converter, "cell 2 3,growx");
 		
 		JPanel appViewer = new JPanel();
 		appViewer.setBackground(Color.GRAY);
 		dashboard.add(appViewer, "name_714913922581402");
-		appViewer.setLayout(new MigLayout("", "[grow][grow][grow]", "[grow][grow][grow][grow][grow][grow][]"));
+		appViewer.setLayout(new MigLayout("", "[125px,grow][125px,grow][125px,grow]", "[grow][grow][grow][grow][grow][grow][][]"));
 		
 		JLabel lblCurrency = new JLabel("CURRENCY");
 		lblCurrency.setForeground(Color.WHITE);
@@ -114,59 +146,81 @@ public class CurrencyExchange extends JFrame {
 		lblSale.setForeground(Color.WHITE);
 		appViewer.add(lblSale, "cell 2 0,alignx center");
 		
-		JLabel label = new JLabel("1");
-		appViewer.add(label, "cell 0 1,alignx center");
+		JLabel lblUsd = new JLabel("USD");
+		lblUsd.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblUsd.setForeground(UIManager.getColor("CheckBox.highlight"));
+		appViewer.add(lblUsd, "cell 0 1,alignx center");
 		
-		JTextPane textPane_11 = new JTextPane();
-		appViewer.add(textPane_11, "cell 1 1,grow");
+		JTextPane purchaseUSD = new JTextPane();
+		appViewer.add(purchaseUSD, "cell 1 1,grow");
 		
-		JTextPane textPane_12 = new JTextPane();
-		appViewer.add(textPane_12, "cell 2 1,grow");
+		JTextPane saleUSD = new JTextPane();
+		appViewer.add(saleUSD, "cell 2 1,grow");
 		
-		JLabel label_1 = new JLabel("2");
-		appViewer.add(label_1, "cell 0 2,alignx center");
+		JLabel lblEur = new JLabel("EUR");
+		lblEur.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblEur.setForeground(UIManager.getColor("Button.disabledShadow"));
+		appViewer.add(lblEur, "cell 0 2,alignx center");
 		
-		JTextPane textPane_14 = new JTextPane();
-		appViewer.add(textPane_14, "cell 1 2,grow");
+		JTextPane purchaseEUR = new JTextPane();
+		appViewer.add(purchaseEUR, "cell 1 2,grow");
 		
-		JTextPane textPane_16 = new JTextPane();
-		appViewer.add(textPane_16, "cell 2 2,grow");
+		JTextPane saleEUR = new JTextPane();
+		appViewer.add(saleEUR, "cell 2 2,grow");
 		
-		JLabel label_2 = new JLabel("3");
-		appViewer.add(label_2, "cell 0 3,alignx center");
+		JLabel lblGbp = new JLabel("GBP");
+		lblGbp.setForeground(UIManager.getColor("Button.disabledShadow"));
+		lblGbp.setFont(new Font("Tahoma", Font.BOLD, 12));
+		appViewer.add(lblGbp, "cell 0 3,alignx center");
 		
-		JTextPane textPane_15 = new JTextPane();
-		appViewer.add(textPane_15, "cell 1 3,grow");
+		JTextPane purchaseGBP = new JTextPane();
+		appViewer.add(purchaseGBP, "cell 1 3,grow");
 		
-		JTextPane textPane_17 = new JTextPane();
-		appViewer.add(textPane_17, "cell 2 3,grow");
+		JTextPane saleGBP = new JTextPane();
+		appViewer.add(saleGBP, "cell 2 3,grow");
 		
-		JLabel label_3 = new JLabel("4");
-		appViewer.add(label_3, "cell 0 4,alignx center");
+		JLabel lblChf = new JLabel("CHF");
+		lblChf.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblChf.setForeground(UIManager.getColor("Button.disabledShadow"));
+		appViewer.add(lblChf, "cell 0 4,alignx center");
 		
-		JTextPane textPane_13 = new JTextPane();
-		appViewer.add(textPane_13, "cell 1 4,grow");
+		JTextPane purchaseCHF = new JTextPane();
+		appViewer.add(purchaseCHF, "cell 1 4,grow");
 		
-		JTextPane textPane_18 = new JTextPane();
-		appViewer.add(textPane_18, "cell 2 4,grow");
+		JTextPane saleCHF = new JTextPane();
+		appViewer.add(saleCHF, "cell 2 4,grow");
 		
-		JLabel label_4 = new JLabel("5");
-		appViewer.add(label_4, "cell 0 5,alignx center");
+		JLabel lblAud = new JLabel("AUD\r\n");
+		lblAud.setFont(new Font("Tahoma", Font.BOLD, 12));
+		lblAud.setForeground(UIManager.getColor("Button.disabledShadow"));
+		appViewer.add(lblAud, "cell 0 5,alignx center");
 		
-		JTextPane textPane_20 = new JTextPane();
-		appViewer.add(textPane_20, "cell 1 5,grow");
+		JTextPane purchaseAUD = new JTextPane();
+		appViewer.add(purchaseAUD, "cell 1 5,grow");
 		
-		JTextPane textPane_21 = new JTextPane();
-		appViewer.add(textPane_21, "cell 2 5,grow");
+		JTextPane saleAUD = new JTextPane();
+		appViewer.add(saleAUD, "cell 2 5,grow");
 		
-		JButton btnNewButton_3 = new JButton("Get data from API");
-		appViewer.add(btnNewButton_3, "cell 0 6,alignx center");
+		txtLoadData_viewer = new JTextField();
+		txtLoadData_viewer.setEditable(false);
+		txtLoadData_viewer.setText("Load data from DB...");
+		appViewer.add(txtLoadData_viewer, "cell 1 6,growx");
+		txtLoadData_viewer.setColumns(10);
 		
-		JButton btnLoadDataFrom = new JButton("Load data from DB");
-		appViewer.add(btnLoadDataFrom, "cell 1 6,alignx center");
+		txtDeleteData_viewer = new JTextField();
+		txtDeleteData_viewer.setEditable(false);
+		txtDeleteData_viewer.setText("Delete data from DB...");
+		appViewer.add(txtDeleteData_viewer, "cell 2 6,growx");
+		txtDeleteData_viewer.setColumns(10);
 		
-		JComboBox comboBox_2 = new JComboBox();
-		appViewer.add(comboBox_2, "cell 2 6,growx");
+		JButton btnGetFromAPI_viewer = new JButton("Get data from API");
+		appViewer.add(btnGetFromAPI_viewer, "cell 0 7,growx");
+		
+		JComboBox selectToLoad_viewer = new JComboBox();
+		appViewer.add(selectToLoad_viewer, "cell 1 7,growx");
+		
+		JComboBox selectToDelete_viewer = new JComboBox();
+		appViewer.add(selectToDelete_viewer, "cell 2 7,growx");
 		
 		JButton btnConverter = new JButton("Convert currencies");
 		btnConverter.addActionListener(new ActionListener() {

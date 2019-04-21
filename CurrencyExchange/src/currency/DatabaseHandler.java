@@ -1,3 +1,5 @@
+package currency;
+
 public class DatabaseHandler {
 	static public void deleteAll() {
 		;
