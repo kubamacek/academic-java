@@ -25,6 +25,8 @@ public class HttpHandler {
 	       result.append(line);
 	    }
 	    rd.close();
+	    result.deleteCharAt(0);
+	    result.deleteCharAt(result.length()-1);
 	    data = result.toString();
 	}
 	

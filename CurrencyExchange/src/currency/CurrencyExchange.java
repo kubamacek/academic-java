@@ -12,6 +12,9 @@ import java.awt.CardLayout;
 import java.awt.Color;
 import net.miginfocom.swing.MigLayout;
 import java.awt.event.ActionListener;
+import java.io.IOException;
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.awt.event.ActionEvent;
 import javax.swing.JSlider;
 import javax.swing.UIManager;
@@ -22,6 +25,7 @@ import javax.swing.JTextArea;
 import javax.swing.JLabel;
 import java.awt.Font;
 import javax.swing.SwingConstants;
+import org.json.*;
 
 public class CurrencyExchange extends JFrame {
 
@@ -152,9 +156,11 @@ public class CurrencyExchange extends JFrame {
 		appViewer.add(lblUsd, "cell 0 1,alignx center");
 		
 		JTextPane purchaseUSD = new JTextPane();
+		purchaseUSD.setEditable(false);
 		appViewer.add(purchaseUSD, "cell 1 1,grow");
 		
 		JTextPane saleUSD = new JTextPane();
+		saleUSD.setEditable(false);
 		appViewer.add(saleUSD, "cell 2 1,grow");
 		
 		JLabel lblEur = new JLabel("EUR");
@@ -163,9 +169,11 @@ public class CurrencyExchange extends JFrame {
 		appViewer.add(lblEur, "cell 0 2,alignx center");
 		
 		JTextPane purchaseEUR = new JTextPane();
+		purchaseEUR.setEditable(false);
 		appViewer.add(purchaseEUR, "cell 1 2,grow");
 		
 		JTextPane saleEUR = new JTextPane();
+		saleEUR.setEditable(false);
 		appViewer.add(saleEUR, "cell 2 2,grow");
 		
 		JLabel lblGbp = new JLabel("GBP");
@@ -174,9 +182,11 @@ public class CurrencyExchange extends JFrame {
 		appViewer.add(lblGbp, "cell 0 3,alignx center");
 		
 		JTextPane purchaseGBP = new JTextPane();
+		purchaseGBP.setEditable(false);
 		appViewer.add(purchaseGBP, "cell 1 3,grow");
 		
 		JTextPane saleGBP = new JTextPane();
+		saleGBP.setEditable(false);
 		appViewer.add(saleGBP, "cell 2 3,grow");
 		
 		JLabel lblChf = new JLabel("CHF");
@@ -185,9 +195,11 @@ public class CurrencyExchange extends JFrame {
 		appViewer.add(lblChf, "cell 0 4,alignx center");
 		
 		JTextPane purchaseCHF = new JTextPane();
+		purchaseCHF.setEditable(false);
 		appViewer.add(purchaseCHF, "cell 1 4,grow");
 		
 		JTextPane saleCHF = new JTextPane();
+		saleCHF.setEditable(false);
 		appViewer.add(saleCHF, "cell 2 4,grow");
 		
 		JLabel lblAud = new JLabel("AUD\r\n");
@@ -196,9 +208,11 @@ public class CurrencyExchange extends JFrame {
 		appViewer.add(lblAud, "cell 0 5,alignx center");
 		
 		JTextPane purchaseAUD = new JTextPane();
+		purchaseAUD.setEditable(false);
 		appViewer.add(purchaseAUD, "cell 1 5,grow");
 		
 		JTextPane saleAUD = new JTextPane();
+		saleAUD.setEditable(false);
 		appViewer.add(saleAUD, "cell 2 5,grow");
 		
 		txtLoadData_viewer = new JTextField();
@@ -214,6 +228,31 @@ public class CurrencyExchange extends JFrame {
 		txtDeleteData_viewer.setColumns(10);
 		
 		JButton btnGetFromAPI_viewer = new JButton("Get data from API");
+		btnGetFromAPI_viewer.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String url = "http://api.nbp.pl/api/exchangerates/tables/c/?format=json";
+				HttpHandler handler = new HttpHandler(url);
+				try {
+					handler.load();
+				} catch (IOException err) {
+					err.printStackTrace();
+				}
+				JSONObject data = handler.getJsonObject();
+				JsonParser parser = new JsonParser(data);
+				String date = parser.getValue("effectiveDate");
+				HashMap<String, ArrayList<Double>> ratesMap = parser.getRates();
+				purchaseUSD.setText(ratesMap.get("USD").get(0).toString());
+				saleUSD.setText(ratesMap.get("USD").get(1).toString());
+				purchaseEUR.setText(ratesMap.get("EUR").get(0).toString());
+				saleEUR.setText(ratesMap.get("EUR").get(1).toString());
+				purchaseGBP.setText(ratesMap.get("GBP").get(0).toString());
+				saleGBP.setText(ratesMap.get("GBP").get(1).toString());
+				purchaseCHF.setText(ratesMap.get("CHF").get(0).toString());
+				saleCHF.setText(ratesMap.get("CHF").get(1).toString());
+				purchaseAUD.setText(ratesMap.get("AUD").get(0).toString());
+				saleAUD.setText(ratesMap.get("AUD").get(1).toString());
+			}
+		});
 		appViewer.add(btnGetFromAPI_viewer, "cell 0 7,growx");
 		
 		JComboBox selectToLoad_viewer = new JComboBox();
