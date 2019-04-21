@@ -18,7 +18,7 @@ public class JsonParser {
 	public String getValue(String key) {
 		return json.getString(key);
 	}
-	public HashMap<String, ArrayList<Double>> getRates() {
+	public HashMap<String, ArrayList<Double>> getRatesViewer() {
 		JSONArray rates = json.getJSONArray("rates");
 		ArrayList<String> currencies = new ArrayList<String>(
 	            Arrays.asList("USD", "EUR", "GBP", "CHF", "AUD"));
@@ -34,6 +34,23 @@ public class JsonParser {
 			tmp.add(filteredrates.getJSONObject(i).getDouble("bid")); // purchase
 			tmp.add(filteredrates.getJSONObject(i).getDouble("ask")); // sale
 			ratesMap.put(filteredrates.getJSONObject(i).getString("code"), tmp);
+		}
+		return ratesMap;
+	}
+	public HashMap<String, Double> getRatesConverter() {
+		JSONArray rates = json.getJSONArray("rates");
+		ArrayList<String> currencies = new ArrayList<String>(
+	            Arrays.asList("USD", "EUR", "GBP", "CHF", "AUD"));
+		JSONArray filteredrates = new JSONArray();
+		HashMap<String, Double> ratesMap = new HashMap<String, Double>();
+		for (int i = 0; i < rates.length(); i++) {
+			if (currencies.contains(rates.getJSONObject(i).getString("code"))) {
+				filteredrates.put(rates.getJSONObject(i));
+			}
+		}
+		for (int i = 0; i < filteredrates.length(); i++) {
+			ratesMap.put(filteredrates.getJSONObject(i).getString("code"),
+					filteredrates.getJSONObject(i).getDouble("mid"));
 		}
 		return ratesMap;
 	}

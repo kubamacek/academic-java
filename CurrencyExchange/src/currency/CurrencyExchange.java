@@ -26,6 +26,11 @@ import javax.swing.JLabel;
 import java.awt.Font;
 import javax.swing.SwingConstants;
 import org.json.*;
+import org.jdesktop.beansbinding.Property;
+import org.jdesktop.beansbinding.BeanProperty;
+import org.jdesktop.beansbinding.AutoBinding;
+import org.jdesktop.beansbinding.Bindings;
+import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 
 public class CurrencyExchange extends JFrame {
 
@@ -37,6 +42,13 @@ public class CurrencyExchange extends JFrame {
 	private JTextField txtDeleteData_converter;
 	private JTextField txtLoadData_viewer;
 	private JTextField txtDeleteData_viewer;
+	private JTextPane value_PLN;
+	private JTextPane value_Converted;
+	public Double USDcourse;
+	public Double EURcourse;
+	public Double GBPcourse;
+	public Double CHFcourse;
+	public Double AUDcourse;
 
 	/**
 	 * Launch the application.
@@ -79,6 +91,12 @@ public class CurrencyExchange extends JFrame {
 		appConverter.setBackground(Color.LIGHT_GRAY);
 		dashboard.add(appConverter, "name_714925199361600");
 		appConverter.setLayout(new MigLayout("", "[125px,grow][125px,grow][125px,grow]", "[grow][grow][][]"));
+
+		value_Converted = new JTextPane();
+		appConverter.add(value_Converted, "cell 2 0,growx,aligny bottom");
+
+		value_PLN = new JTextPane();
+		appConverter.add(value_PLN, "cell 2 1,growx,aligny top");
 		
 		txtConvertFrom = new JTextField();
 		txtConvertFrom.setEditable(false);
@@ -86,15 +104,31 @@ public class CurrencyExchange extends JFrame {
 		appConverter.add(txtConvertFrom, "cell 0 0,growx,aligny bottom");
 		txtConvertFrom.setColumns(10);
 		
-		txtPLN = new JTextField();
-		txtPLN.setEditable(false);
-		txtPLN.setHorizontalAlignment(SwingConstants.CENTER);
-		txtPLN.setText("PLN");
-		appConverter.add(txtPLN, "cell 1 0,growx,aligny bottom");
-		txtPLN.setColumns(10);
-		
-		JTextPane value_PLN = new JTextPane();
-		appConverter.add(value_PLN, "cell 2 0,growx,aligny bottom");
+		String[] currencies = { "USD", "EUR", "GBP", "CHF", "AUD"};
+		JComboBox selectCurrency = new JComboBox(currencies);
+		selectCurrency.setSelectedIndex(4);
+		selectCurrency.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				Double amount = Double.parseDouble(value_Converted.getText());
+				String currency = selectCurrency.getSelectedItem().toString();
+				if (currency.equals("USD")) {
+					value_PLN.setText(String.valueOf(amount*USDcourse));
+				}
+				else if (currency.equals("EUR")) {
+					value_PLN.setText(String.valueOf(amount*EURcourse));
+				}
+				else if (currency.equals("GBP")) {
+					value_PLN.setText(String.valueOf(amount*GBPcourse));
+				}
+				else if (currency.equals("CHF")) {
+					value_PLN.setText(String.valueOf(amount*CHFcourse));
+				}
+				else if (currency.equals("AUD")) {
+					value_PLN.setText(String.valueOf(amount*AUDcourse));
+				}
+			}
+		});
+		appConverter.add(selectCurrency, "flowy,cell 1 0,growx,aligny bottom");
 		
 		txtConvertTo = new JTextField();
 		txtConvertTo.setEditable(false);
@@ -102,11 +136,13 @@ public class CurrencyExchange extends JFrame {
 		appConverter.add(txtConvertTo, "cell 0 1,growx,aligny top");
 		txtConvertTo.setColumns(10);
 		
-		JComboBox selectCurrency = new JComboBox();
-		appConverter.add(selectCurrency, "cell 1 1,growx,aligny top");
-		
-		JTextPane value_Converted = new JTextPane();
-		appConverter.add(value_Converted, "cell 2 1,growx,aligny top");
+		txtPLN = new JTextField();
+		txtPLN.setFont(new Font("Tahoma", Font.PLAIN, 12));
+		txtPLN.setEditable(false);
+		txtPLN.setHorizontalAlignment(SwingConstants.LEFT);
+		txtPLN.setText("PLN");
+		appConverter.add(txtPLN, "cell 1 1,growx,aligny top");
+		txtPLN.setColumns(10);
 		
 		txtLoadData_converter = new JTextField();
 		txtLoadData_converter.setEditable(false);
@@ -121,6 +157,27 @@ public class CurrencyExchange extends JFrame {
 		appConverter.add(txtDeleteData_converter, "cell 2 2,growx");
 		
 		JButton btnGetFromAPI_converter = new JButton("Get data from API");
+		btnGetFromAPI_converter.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				String url = "http://api.nbp.pl/api/exchangerates/tables/a/?format=json";
+				HttpHandler handler = new HttpHandler(url);
+				try {
+					handler.load();
+				} catch (IOException err) {
+					err.printStackTrace();
+				}
+				JSONObject data = handler.getJsonObject();
+				JsonParser parser = new JsonParser(data);
+				String date = parser.getValue("effectiveDate");
+				HashMap<String, Double> ratesMap = parser.getRatesConverter();
+				System.out.println(ratesMap);
+				USDcourse = ratesMap.get("USD");
+				EURcourse = ratesMap.get("EUR");
+				GBPcourse = ratesMap.get("GBP");
+				CHFcourse = ratesMap.get("CHF");
+				AUDcourse = ratesMap.get("AUD");
+			}
+		});
 		appConverter.add(btnGetFromAPI_converter, "cell 0 3,growx");
 		
 		JComboBox selectToLoad_converter = new JComboBox();
@@ -240,7 +297,7 @@ public class CurrencyExchange extends JFrame {
 				JSONObject data = handler.getJsonObject();
 				JsonParser parser = new JsonParser(data);
 				String date = parser.getValue("effectiveDate");
-				HashMap<String, ArrayList<Double>> ratesMap = parser.getRates();
+				HashMap<String, ArrayList<Double>> ratesMap = parser.getRatesViewer();
 				purchaseUSD.setText(ratesMap.get("USD").get(0).toString());
 				saleUSD.setText(ratesMap.get("USD").get(1).toString());
 				purchaseEUR.setText(ratesMap.get("EUR").get(0).toString());
@@ -282,7 +339,5 @@ public class CurrencyExchange extends JFrame {
 			}
 		});
 		menu.add(btnViewer);
-		
 	}
-
 }
