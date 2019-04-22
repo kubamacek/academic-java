@@ -34,16 +34,17 @@ import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 
 public class CurrencyExchange extends JFrame {
 
+	private String url = "http://api.nbp.pl/api/exchangerates/tables/a/?format=json";
 	private JPanel contentPane;
 	private JTextField txtConvertFrom;
 	private JTextField txtConvertTo;
 	private JTextField txtPLN;
 	private JTextField txtLoadData_converter;
-	private JTextField txtDeleteData_converter;
 	private JTextField txtLoadData_viewer;
 	private JTextField txtDeleteData_viewer;
 	private JTextPane value_PLN;
 	private JTextPane value_Converted;
+	private String[] currencies = { "USD", "EUR", "GBP", "CHF", "AUD"};
 	public Double USDcourse;
 	public Double EURcourse;
 	public Double GBPcourse;
@@ -71,6 +72,18 @@ public class CurrencyExchange extends JFrame {
 	 * Create the frame.
 	 */
 	public CurrencyExchange() {
+		DatabaseHandler db = new DatabaseHandler();
+		db.connect();
+		db.createNewTableIfNotExist("currency");
+		db.disconnect();
+		HttpHandler handler = new HttpHandler(url);
+		try {
+			handler.load();
+		} catch (IOException err) {
+			// get currency from db
+			err.printStackTrace();
+		}
+		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
 		contentPane = new JPanel();
@@ -104,7 +117,6 @@ public class CurrencyExchange extends JFrame {
 		appConverter.add(txtConvertFrom, "cell 0 0,growx,aligny bottom");
 		txtConvertFrom.setColumns(10);
 		
-		String[] currencies = { "USD", "EUR", "GBP", "CHF", "AUD"};
 		JComboBox selectCurrency = new JComboBox(currencies);
 		selectCurrency.setSelectedIndex(4);
 		selectCurrency.addActionListener(new ActionListener() {
@@ -146,46 +158,22 @@ public class CurrencyExchange extends JFrame {
 		
 		txtLoadData_converter = new JTextField();
 		txtLoadData_converter.setEditable(false);
-		txtLoadData_converter.setText("Load data from DB...");
-		appConverter.add(txtLoadData_converter, "cell 1 2,growx");
+		txtLoadData_converter.setText("Load data from date...");
+		appConverter.add(txtLoadData_converter, "cell 2 2,growx");
 		txtLoadData_converter.setColumns(10);
 		
-		txtDeleteData_converter = new JTextField();
-		txtDeleteData_converter.setEditable(false);
-		txtDeleteData_converter.setText("Delete data from DB...");
-		txtDeleteData_converter.setColumns(10);
-		appConverter.add(txtDeleteData_converter, "cell 2 2,growx");
-		
-		JButton btnGetFromAPI_converter = new JButton("Get data from API");
-		btnGetFromAPI_converter.addActionListener(new ActionListener() {
+		db.connect();
+		ArrayList<String> dates = db.selectAll("currency", "date");
+		db.disconnect();
+		JComboBox selectToLoad_converter = new JComboBox(dates.toArray());
+		selectToLoad_converter.setSelectedIndex(-1);
+		selectToLoad_converter.setToolTipText("Load from DB...");
+		appConverter.add(selectToLoad_converter, "cell 2 3,growx");
+		selectToLoad_converter.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String url = "http://api.nbp.pl/api/exchangerates/tables/a/?format=json";
-				HttpHandler handler = new HttpHandler(url);
-				try {
-					handler.load();
-				} catch (IOException err) {
-					err.printStackTrace();
-				}
-				JSONObject data = handler.getJsonObject();
-				JsonParser parser = new JsonParser(data);
-				String date = parser.getValue("effectiveDate");
-				HashMap<String, Double> ratesMap = parser.getRatesConverter();
-				System.out.println(ratesMap);
-				USDcourse = ratesMap.get("USD");
-				EURcourse = ratesMap.get("EUR");
-				GBPcourse = ratesMap.get("GBP");
-				CHFcourse = ratesMap.get("CHF");
-				AUDcourse = ratesMap.get("AUD");
+				// set currencies from this date
 			}
 		});
-		appConverter.add(btnGetFromAPI_converter, "cell 0 3,growx");
-		
-		JComboBox selectToLoad_converter = new JComboBox();
-		selectToLoad_converter.setToolTipText("Load from DB...");
-		appConverter.add(selectToLoad_converter, "cell 1 3,growx");
-		
-		JComboBox selectToDelete_converter = new JComboBox();
-		appConverter.add(selectToDelete_converter, "cell 2 3,growx");
 		
 		JPanel appViewer = new JPanel();
 		appViewer.setBackground(Color.GRAY);
@@ -284,33 +272,16 @@ public class CurrencyExchange extends JFrame {
 		appViewer.add(txtDeleteData_viewer, "cell 2 6,growx");
 		txtDeleteData_viewer.setColumns(10);
 		
-		JButton btnGetFromAPI_viewer = new JButton("Get data from API");
-		btnGetFromAPI_viewer.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-				String url = "http://api.nbp.pl/api/exchangerates/tables/c/?format=json";
-				HttpHandler handler = new HttpHandler(url);
-				try {
-					handler.load();
-				} catch (IOException err) {
-					err.printStackTrace();
-				}
-				JSONObject data = handler.getJsonObject();
-				JsonParser parser = new JsonParser(data);
-				String date = parser.getValue("effectiveDate");
-				HashMap<String, ArrayList<Double>> ratesMap = parser.getRatesViewer();
-				purchaseUSD.setText(ratesMap.get("USD").get(0).toString());
-				saleUSD.setText(ratesMap.get("USD").get(1).toString());
-				purchaseEUR.setText(ratesMap.get("EUR").get(0).toString());
-				saleEUR.setText(ratesMap.get("EUR").get(1).toString());
-				purchaseGBP.setText(ratesMap.get("GBP").get(0).toString());
-				saleGBP.setText(ratesMap.get("GBP").get(1).toString());
-				purchaseCHF.setText(ratesMap.get("CHF").get(0).toString());
-				saleCHF.setText(ratesMap.get("CHF").get(1).toString());
-				purchaseAUD.setText(ratesMap.get("AUD").get(0).toString());
-				saleAUD.setText(ratesMap.get("AUD").get(1).toString());
-			}
-		});
-		appViewer.add(btnGetFromAPI_viewer, "cell 0 7,growx");
+		JSONObject data = handler.getJsonObject();
+		JsonParser parser = new JsonParser(data);
+		String date = parser.getValue("effectiveDate");
+		HashMap<String, Double> ratesMap = parser.getRatesConverter();
+		System.out.println(ratesMap);
+		USDcourse = ratesMap.get("USD");
+		EURcourse = ratesMap.get("EUR");
+		GBPcourse = ratesMap.get("GBP");
+		CHFcourse = ratesMap.get("CHF");
+		AUDcourse = ratesMap.get("AUD");
 		
 		JComboBox selectToLoad_viewer = new JComboBox();
 		appViewer.add(selectToLoad_viewer, "cell 1 7,growx");
