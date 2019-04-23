@@ -34,7 +34,7 @@ import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
 
 public class CurrencyExchange extends JFrame {
 
-	private String url = "http://api.nbp.pl/api/exchangerates/tables/a/?format=json";
+	private String url = "http://api.nbp.pl/api/exchangerates/tables/c/?format=json";
 	private JPanel contentPane;
 	private JTextField txtConvertFrom;
 	private JTextField txtConvertTo;
@@ -45,11 +45,7 @@ public class CurrencyExchange extends JFrame {
 	private JTextPane value_PLN;
 	private JTextPane value_Converted;
 	private String[] currencies = { "USD", "EUR", "GBP", "CHF", "AUD"};
-	public Double USDcourse;
-	public Double EURcourse;
-	public Double GBPcourse;
-	public Double CHFcourse;
-	public Double AUDcourse;
+	HashMap<String, ArrayList<Double>> ratesMap;
 
 	/**
 	 * Launch the application.
@@ -76,13 +72,13 @@ public class CurrencyExchange extends JFrame {
 		db.connect();
 		db.createNewTableIfNotExist("currency");
 		db.disconnect();
-		HttpHandler handler = new HttpHandler(url);
-		try {
-			handler.load();
-		} catch (IOException err) {
-			// get currency from db
-			err.printStackTrace();
-		}
+//		HttpHandler handler = new HttpHandler(url);
+//		try {
+//			handler.load();
+//		} catch (IOException err) {
+//			// get currency from db
+//			err.printStackTrace();
+//		}
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		setBounds(100, 100, 450, 300);
@@ -121,23 +117,23 @@ public class CurrencyExchange extends JFrame {
 		selectCurrency.setSelectedIndex(4);
 		selectCurrency.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				Double amount = Double.parseDouble(value_Converted.getText());
-				String currency = selectCurrency.getSelectedItem().toString();
-				if (currency.equals("USD")) {
-					value_PLN.setText(String.valueOf(amount*USDcourse));
-				}
-				else if (currency.equals("EUR")) {
-					value_PLN.setText(String.valueOf(amount*EURcourse));
-				}
-				else if (currency.equals("GBP")) {
-					value_PLN.setText(String.valueOf(amount*GBPcourse));
-				}
-				else if (currency.equals("CHF")) {
-					value_PLN.setText(String.valueOf(amount*CHFcourse));
-				}
-				else if (currency.equals("AUD")) {
-					value_PLN.setText(String.valueOf(amount*AUDcourse));
-				}
+//				Double amount = Double.parseDouble(value_Converted.getText());
+//				String currency = selectCurrency.getSelectedItem().toString();
+//				if (currency.equals("USD")) {
+//					value_PLN.setText(String.valueOf(amount*USDcourse));
+//				}
+//				else if (currency.equals("EUR")) {
+//					value_PLN.setText(String.valueOf(amount*EURcourse));
+//				}
+//				else if (currency.equals("GBP")) {
+//					value_PLN.setText(String.valueOf(amount*GBPcourse));
+//				}
+//				else if (currency.equals("CHF")) {
+//					value_PLN.setText(String.valueOf(amount*CHFcourse));
+//				}
+//				else if (currency.equals("AUD")) {
+//					value_PLN.setText(String.valueOf(amount*AUDcourse));
+//				}
 			}
 		});
 		appConverter.add(selectCurrency, "flowy,cell 1 0,growx,aligny bottom");
@@ -171,7 +167,12 @@ public class CurrencyExchange extends JFrame {
 		appConverter.add(selectToLoad_converter, "cell 2 3,growx");
 		selectToLoad_converter.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				// set currencies from this date
+				if(selectToLoad_converter.isShowing()) {
+					db.connect();
+					ratesMap = db.selectRow("currency", "date", selectToLoad_converter.getSelectedItem().toString());
+					System.out.println(ratesMap);
+					db.disconnect();
+				}
 			}
 		});
 		
@@ -272,6 +273,7 @@ public class CurrencyExchange extends JFrame {
 		appViewer.add(txtDeleteData_viewer, "cell 2 6,growx");
 		txtDeleteData_viewer.setColumns(10);
 		
+		/*
 		JSONObject data = handler.getJsonObject();
 		JsonParser parser = new JsonParser(data);
 		String date = parser.getValue("effectiveDate");
@@ -282,6 +284,41 @@ public class CurrencyExchange extends JFrame {
 		GBPcourse = ratesMap.get("GBP");
 		CHFcourse = ratesMap.get("CHF");
 		AUDcourse = ratesMap.get("AUD");
+		*/
+		
+		JButton btnLoadDataApi = new JButton("Load data from API");
+		appViewer.add(btnLoadDataApi, "cell 0 7,alignx center");
+		btnLoadDataApi.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				HttpHandler handler = new HttpHandler(url);
+				try {
+					handler.load();
+				} catch (IOException err) {
+					err.printStackTrace();
+				}
+				JSONObject data = handler.getJsonObject();
+				JsonParser parser = new JsonParser(data);
+				String date = parser.getValue("effectiveDate");
+				ratesMap = parser.getRatesViewer();
+				System.out.println(ratesMap);
+				System.out.println(date);
+				
+				db.connect();
+				final boolean exist = db.ifExistsRow("currency", "date");
+				if (exist == false) {
+					db.insert("currency", date, ratesMap);
+				} 
+				
+
+				// move to method "update"
+				selectToLoad_converter.removeAllItems();
+				ArrayList<String> dates = db.selectAll("currency", "date");
+				for(String dateStr : dates) {
+					selectToLoad_converter.addItem(dateStr);
+				}
+				db.disconnect();
+			}
+		});
 		
 		JComboBox selectToLoad_viewer = new JComboBox();
 		appViewer.add(selectToLoad_viewer, "cell 1 7,growx");
