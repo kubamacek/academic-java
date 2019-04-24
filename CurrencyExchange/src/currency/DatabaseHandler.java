@@ -23,6 +23,7 @@ public class DatabaseHandler {
 		try {
 			if (conn != null) {
 				conn.close();
+				System.out.println("Connection to SQLite has been terminated.");
 			}
 		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
@@ -68,7 +69,7 @@ public class DatabaseHandler {
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setDouble(1, data.get("USD").get(0));
             pstmt.setDouble(2, data.get("USD").get(1));
-            pstmt.setDouble(3,data.get("EUR").get(0));
+            pstmt.setDouble(3, data.get("EUR").get(0));
             pstmt.setDouble(4, data.get("EUR").get(1));
             pstmt.setDouble(5, data.get("GBP").get(0));
             pstmt.setDouble(6, data.get("GBP").get(1));
@@ -83,27 +84,37 @@ public class DatabaseHandler {
         }
     }
 	
-	public boolean ifExistsRow(String fileName, String queryName) {
+	public void delete(String fileName, String date) {
+        String sql = "DELETE FROM " + fileName + " WHERE date = " + date;
+
+        try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
+            pstmt.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+	public boolean ifExistsRow(String fileName, String queryName, String date) {
 		String sql = "SELECT " + queryName + " FROM " + fileName;
         ArrayList<String> query = new ArrayList<String>();
-        
+
         try (Statement stmt = conn.createStatement();
             ResultSet rs  = stmt.executeQuery(sql)) {
         	while (rs.next()) {
         		final String row = rs.getString(queryName);
             	query.add(row);
-                if (row.length() != 0) {
+                if (query.contains(date)) {
                 	return true;
                 }
-                return false;
-            }
-           } catch (SQLException e) {
+        	}
+        }
+        catch (SQLException e) {
                System.out.println(e.getMessage());
                return true;
            }
         return false;
 	}
-	
+
 	public ArrayList<String> selectAll(String fileName, String queryName){
         String sql = "SELECT " + queryName + " FROM " + fileName;
         ArrayList<String> query = new ArrayList<String>();
