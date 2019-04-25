@@ -41,7 +41,6 @@ public class CurrencyExchange extends JFrame {
 	private JTextField txtPLN;
 	private JTextField txtLoadData_converter;
 	private JTextField txtLoadData_viewer;
-	private JTextField txtDeleteData_viewer;
 	private JTextPane value_PLN;
 	private JTextPane value_Converted;
 	private String[] currencies = { "USD", "EUR", "GBP", "CHF", "AUD" };
@@ -71,6 +70,8 @@ public class CurrencyExchange extends JFrame {
 		DatabaseHandler db = new DatabaseHandler();
 		db.connect();
 		db.createNewTableIfNotExist("currency");
+		ArrayList<String> dates = db.selectAll("currency", "date");
+		System.out.println("INFO: Dates in DB: " + dates);
 		db.disconnect();
 		
 		setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -169,11 +170,6 @@ public class CurrencyExchange extends JFrame {
 		appConverter.add(txtLoadData_converter, "cell 2 2,growx");
 		txtLoadData_converter.setColumns(10);*/
 		
-		db.connect();
-		ArrayList<String> dates = db.selectAll("currency", "date");
-		System.out.println("INFO: Dates in DB: " + dates);
-		db.disconnect();
-		
 		JLabel lblCurrency = new JLabel("CURRENCY");
 		lblCurrency.setForeground(Color.WHITE);
 		lblCurrency.setFont(new Font("Tahoma", Font.BOLD, 12));
@@ -260,12 +256,6 @@ public class CurrencyExchange extends JFrame {
 		appViewer.add(txtLoadData_viewer, "cell 1 6,growx");
 		txtLoadData_viewer.setColumns(10);
 		
-		txtDeleteData_viewer = new JTextField();
-		txtDeleteData_viewer.setEditable(false);
-		txtDeleteData_viewer.setText("Delete data from DB...");
-		appViewer.add(txtDeleteData_viewer, "cell 2 6,growx");
-		txtDeleteData_viewer.setColumns(10);
-		
 /*		JComboBox selectToLoad_converter = new JComboBox(dates.toArray());
 		selectToLoad_converter.setSelectedIndex(-1);
 		selectToLoad_converter.setToolTipText("Load from DB...");
@@ -291,6 +281,7 @@ public class CurrencyExchange extends JFrame {
 				}
 			}
 		});		*/
+		
 
 		JComboBox selectToLoad_viewer = new JComboBox(dates.toArray());
 		selectToLoad_viewer.setSelectedIndex(-1);
@@ -324,14 +315,22 @@ public class CurrencyExchange extends JFrame {
 		appViewer.add(selectToDelete_viewer, "cell 2 7,growx");
 		selectToDelete_viewer.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				if(selectToDelete_viewer.isShowing()) {
-					db.connect();
-					db.delete("currency", selectToDelete_viewer.getSelectedItem().toString());
-					System.out.println("INFO: Removed data from: " + selectToDelete_viewer.getSelectedItem().toString());
-					db.disconnect();
-				}
 			}
 		});
+		
+		JButton btnDeleteRowIn = new JButton("Delete row in database");
+		btnDeleteRowIn.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent arg0) {
+				db.connect();
+				db.delete("currency", selectToDelete_viewer.getSelectedItem().toString());
+				System.out.println("INFO: Removed data from: " + selectToDelete_viewer.getSelectedItem().toString());
+				selectToDelete_viewer.removeItemAt(selectToDelete_viewer.getSelectedIndex());
+				selectToDelete_viewer.setSelectedIndex(-1);
+				db.disconnect();
+			}
+		});
+		appViewer.add(btnDeleteRowIn, "cell 2 6");
+		
 		JButton btnLoadDataApi = new JButton("Load data from API");
 		appViewer.add(btnLoadDataApi, "cell 0 7,alignx center");
 		btnLoadDataApi.addActionListener(new ActionListener() {
@@ -354,6 +353,7 @@ public class CurrencyExchange extends JFrame {
 				if (exist == false) {
 					db.insert("currency", date, ratesMap);
 					selectToLoad_viewer.addItem(date);
+					selectToDelete_viewer.addItem(date);
 				}
 				else {
 					System.out.println("INFO: Entry for " + date + " already exists!");

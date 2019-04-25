@@ -65,7 +65,6 @@ public class DatabaseHandler {
 	
 	public void insert(String fileName, String date, HashMap<String, ArrayList<Double>> data) {
         String sql = "INSERT INTO " + fileName + "(USD_bid,USD_ask,EUR_bid,EUR_ask,GBP_bid,GBP_ask,CHF_bid,CHF_ask,AUD_bid,AUD_ask,date) VALUES(?,?,?,?,?,?,?,?,?,?,?)";
- 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.setDouble(1, data.get("USD").get(0));
             pstmt.setDouble(2, data.get("USD").get(1));
@@ -79,13 +78,15 @@ public class DatabaseHandler {
             pstmt.setDouble(10, data.get("AUD").get(1));
             pstmt.setString(11, date);
             pstmt.executeUpdate();
+            System.out.println("INFO: Data has been insert to db");
         } catch (SQLException e) {
             System.out.println(e.getMessage());
+            System.out.println("ERROR: Did not insert data");
         }
     }
 	
 	public void delete(String fileName, String date) {
-        String sql = "DELETE FROM " + fileName + " WHERE date = " + date;
+        String sql = "DELETE FROM " + fileName + " WHERE date = '" + date + "'";
 
         try (PreparedStatement pstmt = conn.prepareStatement(sql)) {
             pstmt.executeUpdate();
@@ -121,11 +122,11 @@ public class DatabaseHandler {
         
         try (Statement stmt = conn.createStatement();
              ResultSet rs  = stmt.executeQuery(sql)) {
-            
             while (rs.next()) {
             	query.add(rs.getString(queryName));
             }
         } catch (SQLException e) {
+        	System.out.println("ERROR: Did not select all data");
             System.out.println(e.getMessage());
         }
 
