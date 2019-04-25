@@ -353,12 +353,7 @@ public class CurrencyExchange extends JFrame {
 				final boolean exist = db.ifExistsRow("currency", "date", date);
 				if (exist == false) {
 					db.insert("currency", date, ratesMap);
-					selectToLoad_viewer.removeAllItems();
-					ArrayList<String> dates = db.selectAll("currency", "date");
-					for(String dateStr : dates) {
-						System.out.println(dateStr);
-						selectToLoad_viewer.addItem(dateStr);
-					}
+					selectToLoad_viewer.addItem(date);
 				}
 				else {
 					System.out.println("INFO: Entry for " + date + " already exists!");
