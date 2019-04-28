@@ -22,6 +22,7 @@ import java.awt.event.ActionEvent;
 import javax.swing.UIManager;
 import javax.swing.JComboBox;
 import javax.swing.JTextField;
+import javax.swing.JPanel;
 import javax.swing.JTextPane;
 import javax.swing.JLabel;
 import java.awt.Font;
@@ -33,6 +34,8 @@ import org.jdesktop.beansbinding.BeanProperty;
 import org.jdesktop.beansbinding.AutoBinding;
 import org.jdesktop.beansbinding.Bindings;
 import org.jdesktop.beansbinding.AutoBinding.UpdateStrategy;
+import org.jdesktop.beansbinding.Converter;
+import org.jdesktop.beansbinding.ObjectProperty;
 
 public class CurrencyExchange extends JFrame {
 
@@ -44,6 +47,7 @@ public class CurrencyExchange extends JFrame {
 	private JTextField txtLoadData_viewer;
 	private JTextPane value_PLN;
 	private JTextPane value_Converted;
+	private JComboBox selectCurrency;
 	private String[] currencies = { "USD", "EUR", "GBP", "CHF", "AUD" };
 	HashMap<String, ArrayList<Double>> ratesMap;
 	private JTextPane purchaseUSD;
@@ -103,41 +107,11 @@ public class CurrencyExchange extends JFrame {
 		appConverter.setLayout(new MigLayout("", "[125px,grow][125px,grow][125px,grow]", "[grow][grow][][]"));
 
 		value_Converted = new JTextPane();
-		value_Converted.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				initDataBindings();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				initDataBindings();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				initDataBindings();
-			}
-		});
+		value_Converted.getDocument().addDocumentListener(onChangeConverter());
 		appConverter.add(value_Converted, "cell 2 0,growx,aligny bottom");
 		
 		value_PLN = new JTextPane();
-		value_PLN.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				initDataBindings();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				initDataBindings();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				initDataBindings();
-			}
-		});
+		value_PLN.getDocument().addDocumentListener(onChangePLNConverter());
 		appConverter.add(value_PLN, "cell 2 1,growx,aligny top");
 		
 		txtConvertFrom = new JTextField();
@@ -146,42 +120,8 @@ public class CurrencyExchange extends JFrame {
 		appConverter.add(txtConvertFrom, "cell 0 0,growx,aligny bottom");
 		txtConvertFrom.setColumns(10);
 		
-		JComboBox selectCurrency = new JComboBox(currencies);
+		selectCurrency = new JComboBox(currencies);
 		selectCurrency.setSelectedIndex(-1);
-		selectCurrency.addActionListener(new ActionListener() {
-			public void actionPerformed(ActionEvent e) {
-//				Double amount = 0.00;
-//
-//				if (value_Converted.getText().length() != 0) {
-//					amount = Double.parseDouble(value_Converted.getText());
-//				}
-//				else {
-//					System.out.println("ERROR: No value to convert provided!");
-//				}
-//				try {
-//					String currency = selectCurrency.getSelectedItem().toString();
-//					if (currency.equals("USD")) {
-//						value_PLN.setText(String.valueOf(amount*(ratesMap.get("USD").get(0)+ratesMap.get("USD").get(1))/2));
-//					}
-//					else if (currency.equals("EUR")) {
-//						value_PLN.setText(String.valueOf(amount*(ratesMap.get("EUR").get(0)+ratesMap.get("EUR").get(1))/2));
-//					}
-//					else if (currency.equals("GBP")) {
-//						value_PLN.setText(String.valueOf(amount*(ratesMap.get("GBP").get(0)+ratesMap.get("GBP").get(1))/2));
-//					}
-//					else if (currency.equals("CHF")) {
-//						value_PLN.setText(String.valueOf(amount*(ratesMap.get("CHF").get(0)+ratesMap.get("CHF").get(1))/2));
-//					}
-//					else if (currency.equals("AUD")) {
-//						value_PLN.setText(String.valueOf(amount*(ratesMap.get("AUD").get(0)+ratesMap.get("AUD").get(1))/2));
-//					}
-//				}
-//				catch(java.lang.NullPointerException err) {
-//					System.out.println("ERROR: No data loaded!");
-//				}
-
-			}
-		});
 		appConverter.add(selectCurrency, "flowy,cell 1 0,growx,aligny bottom");
 		
 		txtConvertTo = new JTextField();
@@ -295,7 +235,7 @@ public class CurrencyExchange extends JFrame {
 					ratesMap = db.selectRow("currency", "date", selectToLoad_viewer.getSelectedItem().toString());
 					System.out.println("INFO: Selected data from: " + selectToLoad_viewer.getSelectedItem().toString());
 					System.out.println("INFO: Rates status: " + ratesMap);
-//					purchaseUSD.setText(ratesMap.get("USD").get(0).toString());
+					purchaseUSD.setText(ratesMap.get("USD").get(0).toString());
 					saleUSD.setText(ratesMap.get("USD").get(1).toString());
 					purchaseEUR.setText(ratesMap.get("EUR").get(0).toString());
 					saleEUR.setText(ratesMap.get("EUR").get(1).toString());
@@ -395,12 +335,84 @@ public class CurrencyExchange extends JFrame {
 		menu.add(btnConverter);
 		initDataBindings()	;
 	}
+	
+	private void convertToPLN() {
+		String name = selectCurrency.getSelectedItem().toString();
+		Double amount = 0.0;
+		
+		if (value_Converted.getText().length() != 0) {
+			amount = Double.parseDouble(value_Converted.getText());
+		}
+		else {
+			System.out.println("ERROR: No value to convert provided!");
+		}
+		try {
+			value_PLN.setText(String.valueOf(amount*ratesMap.get(name).get(0)));
+		} catch(java.lang.NullPointerException err) {
+			System.out.println("ERROR: No data loaded!");
+		}
+	}
+	
+	private void convertToAny() {
+//		String name = selectCurrency.getSelectedItem().toString();
+//		Double amount = 0.0;
+//		
+//		if (value_PLN.getText().length() != 0) {	
+//			amount = Double.parseDouble(value_PLN.getText());
+//		}
+//		else {
+//			System.out.println("ERROR: No value to convert provided!");
+//		}
+//		try {
+//			value_Converted.setText(String.valueOf(amount/ratesMap.get(name).get(1)));
+//		} catch(java.lang.NullPointerException err) {
+//			System.out.println("ERROR: No data loaded!");
+//		}
+	}
+	
 	protected void initDataBindings() {
-		BeanProperty<JTextPane, String> jTextPaneBeanProperty = BeanProperty.create("text");
-		BeanProperty<JTextPane, String> jTextPaneBeanProperty_1 = BeanProperty.create("text");
-	    AutoBinding<JTextPane, String, JTextPane, String> autoBinding = Bindings.createAutoBinding(UpdateStrategy.READ_WRITE, value_PLN, jTextPaneBeanProperty, value_Converted, jTextPaneBeanProperty_1);
-	    BindConverter conv = new BindConverter();
-	    autoBinding.setConverter(conv);
-	    autoBinding.bind();		
+		ObjectProperty<JTextPane> jTextPaneObjectProperty = ObjectProperty.create();
+		AutoBinding<JTextPane, JTextPane, JTextPane, JTextPane> autoBinding_1 = Bindings.createAutoBinding(UpdateStrategy.READ, value_PLN, value_Converted, jTextPaneObjectProperty);
+		BindConverter conv = new BindConverter(); 
+		autoBinding_1.setConverter(conv);
+		autoBinding_1.bind();
+	}
+	
+	private DocumentListener onChangeConverter() {
+		return new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				convertToPLN();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				convertToPLN();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				convertToPLN();
+			}
+		};
+	}
+	
+	private DocumentListener onChangePLNConverter() {
+		return new DocumentListener() {
+			@Override
+			public void insertUpdate(DocumentEvent e) {
+				convertToAny();
+			}
+
+			@Override
+			public void removeUpdate(DocumentEvent e) {
+				convertToAny();
+			}
+
+			@Override
+			public void changedUpdate(DocumentEvent e) {
+				convertToAny();
+			}
+		};
 	}
 }

@@ -11,9 +11,6 @@ public class DatabaseHandler {
 	public void connect() {
 		try {
 			conn = DriverManager.getConnection(url);
-           
-			System.out.println("Connection to SQLite has been established.");
-           
 		} catch (SQLException e) {
 			System.out.println(e.getMessage());
 		}
@@ -23,7 +20,6 @@ public class DatabaseHandler {
 		try {
 			if (conn != null) {
 				conn.close();
-				System.out.println("Connection to SQLite has been terminated.");
 			}
 		} catch (SQLException ex) {
 			System.out.println(ex.getMessage());
@@ -55,7 +51,6 @@ public class DatabaseHandler {
 		} finally {
 			try {
 				stmt.execute(sql);
-				System.out.println("Table " + fileName + " has been created.");
 			} catch (SQLException ex) {
 				System.out.println(ex.getMessage());
 			}
