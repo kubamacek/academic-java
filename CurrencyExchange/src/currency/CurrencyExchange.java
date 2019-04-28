@@ -342,23 +342,32 @@ public class CurrencyExchange extends JFrame {
 					err.printStackTrace();
 				}
 				JSONObject data = handler.getJsonObject();
-				JsonParser parser = new JsonParser(data);
-				String date = parser.getValue("effectiveDate");
-				ratesMap = parser.getRates();
-				System.out.println("INFO: API request for: " + date);
-				System.out.println("INFO: Rates status: " + ratesMap);
-				
-				db.connect();
-				final boolean exist = db.ifExistsRow("currency", "date", date);
-				if (exist == false) {
-					db.insert("currency", date, ratesMap);
-					selectToLoad_viewer.addItem(date);
-					selectToDelete_viewer.addItem(date);
+				String json_data = data.toString();
+				Boolean valid = handler.isJSONValid(json_data);
+				if (valid == true) {
+					System.out.println("INFO: Valid JSON!");
+					JsonParser parser = new JsonParser(data);
+					String date = parser.getValue("effectiveDate");
+					ratesMap = parser.getRates();
+					System.out.println("INFO: API request for: " + date);
+					System.out.println("INFO: Rates status: " + ratesMap);
+					
+					db.connect();
+					final boolean exist = db.ifExistsRow("currency", "date", date);
+					if (exist == false) {
+						db.insert("currency", date, ratesMap);
+						selectToLoad_viewer.addItem(date);
+						selectToDelete_viewer.addItem(date);
+					}
+					else {
+						System.out.println("INFO: Entry for " + date + " already exists!");
+					}
+					db.disconnect();
 				}
 				else {
-					System.out.println("INFO: Entry for " + date + " already exists!");
+					System.out.println("ERROR: Invalid JSON!");
 				}
-				db.disconnect();
+				
 			}
 		});
 		

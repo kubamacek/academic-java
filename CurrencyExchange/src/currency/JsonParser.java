@@ -18,6 +18,7 @@ public class JsonParser {
 	public String getValue(String key) {
 		return json.getString(key);
 	}
+	
 	public HashMap<String, ArrayList<Double>> getRates() {
 		JSONArray rates = json.getJSONArray("rates");
 		ArrayList<String> currencies = new ArrayList<String>(
