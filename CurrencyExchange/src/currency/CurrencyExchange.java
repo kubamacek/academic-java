@@ -344,7 +344,7 @@ public class CurrencyExchange extends JFrame {
 				JSONObject data = handler.getJsonObject();
 				JsonParser parser = new JsonParser(data);
 				String date = parser.getValue("effectiveDate");
-				ratesMap = parser.getRatesViewer();
+				ratesMap = parser.getRates();
 				System.out.println("INFO: API request for: " + date);
 				System.out.println("INFO: Rates status: " + ratesMap);
 				

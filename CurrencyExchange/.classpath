@@ -10,5 +10,6 @@
 	<classpathentry kind="lib" path="C:/Users/Kuba/eclipse-workspace/pwr-java/CurrencyExchange/beansbinding-1.2.1.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Kuba/eclipse-workspace/pwr-java/CurrencyExchange/json-20180813.jar"/>
 	<classpathentry kind="lib" path="C:/Users/Kuba/eclipse-workspace/pwr-java/CurrencyExchange/sqlite-jdbc-3.27.2.1.jar"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.junit.JUNIT_CONTAINER/5"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
