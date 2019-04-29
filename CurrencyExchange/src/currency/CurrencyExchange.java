@@ -53,7 +53,6 @@ public class CurrencyExchange extends JFrame {
 	HashMap<String, ArrayList<Double>> ratesMap;
 	private JTextPane purchaseUSD;
 	private JTextPane txtDirty;
-	private JTextField txtEntryAmountTo;
 	private JTextField txtFilteredValuedigits;
 
 	/**
@@ -121,8 +120,6 @@ public class CurrencyExchange extends JFrame {
 		appConverter.add(value_Converted, "cell 2 1,growx,aligny top");
 		
 		value_PLN = new JTextPane();
-		value_PLN.setEditable(false);
-		value_PLN.getDocument().addDocumentListener(onChangePLNConverter());
 		appConverter.add(value_PLN, "cell 2 2,growx,aligny bottom");
 		
 		txtConvertFrom = new JTextField();
@@ -132,7 +129,6 @@ public class CurrencyExchange extends JFrame {
 		txtConvertFrom.setColumns(10);
 		
 		selectCurrency = new JComboBox(currencies);
-		selectCurrency.setSelectedIndex(-1);
 		appConverter.add(selectCurrency, "flowy,cell 1 1,growx,aligny top");
 		
 		txtConvertTo = new JTextField();
@@ -148,31 +144,6 @@ public class CurrencyExchange extends JFrame {
 		txtPLN.setText("PLN");
 		appConverter.add(txtPLN, "cell 1 2,growx,aligny bottom");
 		txtPLN.setColumns(10);
-		
-		txtEntryAmountTo = new JTextField();
-		txtEntryAmountTo.setText("Entry value to convert:");
-		txtEntryAmountTo.setEditable(false);
-		appConverter.add(txtEntryAmountTo, "cell 1 3,growx,aligny bottom");
-		txtEntryAmountTo.setColumns(10);
-		
-		txtDirty = new JTextPane();
-		appConverter.add(txtDirty, "cell 2 3,growx,aligny bottom");
-		txtDirty.getDocument().addDocumentListener(new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				initDataBindings();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				initDataBindings();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				initDataBindings();
-			}
-		});
 		
 		JLabel lblCurrency = new JLabel("CURRENCY");
 		lblCurrency.setForeground(Color.WHITE);
@@ -369,82 +340,33 @@ public class CurrencyExchange extends JFrame {
 			}
 		});
 		menu.add(btnConverter);
-		initDataBindings()	;
-	}
-	
-	private void convertToPLN() {
-		String name = selectCurrency.getSelectedItem().toString();
-		Double amount = 0.0;
-		
-		if (value_Converted.getText().length() != 0) {
-			amount = Double.parseDouble(value_Converted.getText());
-		}
-		try {
-			value_PLN.setText(String.valueOf(amount*ratesMap.get(name).get(0)));
-		} catch(java.lang.NullPointerException err) {
-			System.out.println("ERROR: No data loaded!");
-		}
-	}
-	
-	private void convertToAny() {
-//		String name = selectCurrency.getSelectedItem().toString();
-//		Double amount = 0.0;
-//		
-//		if (value_PLN.getText().length() != 0) {	
-//			amount = Double.parseDouble(value_PLN.getText());
-//		}
-//		else {
-//			System.out.println("ERROR: No value to convert provided!");
-//		}
-//		try {
-//			value_Converted.setText(String.valueOf(amount/ratesMap.get(name).get(1)));
-//		} catch(java.lang.NullPointerException err) {
-//			System.out.println("ERROR: No data loaded!");
-//		}
 	}
 	
 	private DocumentListener onChangeConverter() {
 		return new DocumentListener() {
 			@Override
 			public void insertUpdate(DocumentEvent e) {
-				convertToPLN();
+				initDataBindings();
 			}
 
 			@Override
 			public void removeUpdate(DocumentEvent e) {
-				convertToPLN();
+				initDataBindings();
 			}
 
 			@Override
 			public void changedUpdate(DocumentEvent e) {
-				convertToPLN();
+				initDataBindings();
 			}
 		};
 	}
 	
-	private DocumentListener onChangePLNConverter() {
-		return new DocumentListener() {
-			@Override
-			public void insertUpdate(DocumentEvent e) {
-				convertToAny();
-			}
-
-			@Override
-			public void removeUpdate(DocumentEvent e) {
-				convertToAny();
-			}
-
-			@Override
-			public void changedUpdate(DocumentEvent e) {
-				convertToAny();
-			}
-		};
-	}
 	protected void initDataBindings() {
 		Property jTextPaneBeanProperty = BeanProperty.create("text");
 		Property jTextPaneBeanProperty_1 = BeanProperty.create("text");
-		AutoBinding autoBinding = Bindings.createAutoBinding(UpdateStrategy.READ, txtDirty, jTextPaneBeanProperty, value_Converted, jTextPaneBeanProperty_1);
-		autoBinding.setConverter(new BindConverter());
+		AutoBinding autoBinding = Bindings.createAutoBinding(UpdateStrategy.READ_WRITE, value_Converted, jTextPaneBeanProperty, value_PLN, jTextPaneBeanProperty_1);
+		BindConverter conv = new BindConverter(ratesMap.get(selectCurrency.getSelectedItem().toString()).get(0));
+		autoBinding.setConverter(conv);
 		autoBinding.bind();
 	}
 }
