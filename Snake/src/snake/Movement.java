@@ -12,7 +12,6 @@ public class Movement implements KeyListener {
 	}
 	
 	public void keyPressed(KeyEvent k) {
-		System.out.println(k.getKeyText(k.getKeyCode()));
 		final String key = k.getKeyText(k.getKeyCode());
 		direction.setLength(0);
 		switch (key) {

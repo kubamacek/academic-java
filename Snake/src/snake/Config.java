@@ -11,4 +11,5 @@ public class Config {
 	public static Point snakeStartPoint = new Point(0, 0);
 	public static String initDirection = "down";
 	public static int speedFoodRespown = 3000;
+	public static int[] foodValues = {1, 2, 3};
 }

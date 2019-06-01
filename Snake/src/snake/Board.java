@@ -22,11 +22,14 @@ import java.awt.event.ActionEvent;
 import java.util.ArrayList;
 import java.util.Random;
 import java.util.Timer;
+import java.awt.Font;
 
 public class Board extends JFrame {
 	private boolean running = false;
 	private int points = 0;
 	
+	private JLabel lblPoints = new JLabel("Points:");
+	private JLabel pointsLabel = new JLabel("");
 	private JButton btnStart = new JButton("Start");
 	private Snake snake = new Snake();
 	private ArrayList<Food> foods = new ArrayList<>();
@@ -41,7 +44,6 @@ public class Board extends JFrame {
 			if (running) {
 				move();
 				checkCollision();
-				System.out.println(points);
 			}
 		}
 	};
@@ -64,6 +66,8 @@ public class Board extends JFrame {
 					Movement movement = new Movement();
 					movement.setDirection(direction);
 					frame.addKeyListener(movement);
+					frame.setFocusable(true);
+					frame.setFocusTraversalKeysEnabled(false);
 				} catch (Exception e) {
 					e.printStackTrace();
 				}
@@ -81,6 +85,7 @@ public class Board extends JFrame {
 		
 		setContentPane();
 		setStartButton();
+		setPointsLabels();
 		setFPSSelect();
 		setSnake();
 		
@@ -90,18 +95,23 @@ public class Board extends JFrame {
 		if (checkCollisionWithFrame()
 			|| checkCollisionWithWalls()) {
 			btnStart.setVisible(true);
+			lblPoints.setVisible(true);
+			pointsLabel.setVisible(true);
 			direction.setLength(0);
 			snake.draw(contentPane);
 			running = false;
+			pointsLabel.setText(points + "");
+			points = 0;
 		}
 		
-		if (checkCollisionWithFood()) {
-			points++;
+		final int value = checkCollisionWithFood();
+		if (value != 0) {
+			points += value;
 		}
 	}
 	
-	private boolean checkCollisionWithFood() {
-		boolean reached = false;
+	private int checkCollisionWithFood() {
+		int reached = 0;
 		Point pointSnake = snake.getLocation();
 		Dimension dimSnake= snake.getSize();
 		
@@ -112,7 +122,7 @@ public class Board extends JFrame {
 				isInsideBox(pointSnake.x + dimSnake.width, pointSnake.y, loc, dimFood) ||
 				isInsideBox(pointSnake.x, pointSnake.y + dimSnake.height, loc, dimFood) || 
 				isInsideBox(pointSnake.x + dimSnake.width, pointSnake.y + dimSnake.height, loc, dimFood))) {
-				reached = true;
+				reached = food.getValue();
 				food.setEaten();
 				food.removeLabel(contentPane);
 			}
@@ -173,11 +183,24 @@ public class Board extends JFrame {
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent arg0) {
 				btnStart.setVisible(false);
+				lblPoints.setVisible(false);
+				pointsLabel.setVisible(false);
 				direction.append(Config.initDirection);
 				running = true;
 			}
 		});
 		contentPane.add(btnStart);
+	}
+	
+	private void setPointsLabels() {
+		lblPoints.setFont(new Font("Tahoma", Font.PLAIN, 16));
+		lblPoints.setBounds(357, 0, 77, 28);
+		contentPane.add(lblPoints);
+		
+		
+		pointsLabel.setFont(new Font("Tahoma", Font.PLAIN, 18));
+		pointsLabel.setBounds(357, 27, 77, 28);
+		contentPane.add(pointsLabel);
 	}
 	
 	private void setSnake() {
@@ -196,7 +219,6 @@ public class Board extends JFrame {
 	private void spawn() {
 		Food food = new Food();
 		Random rand = new Random();
-		System.out.println(contentPane.getSize().width);
 		int x = rand.nextInt(contentPane.getSize().width - Config.segmentSize);
 		int y = rand.nextInt(contentPane.getSize().height - Config.segmentSize);
 		food.draw(contentPane, x, y);
