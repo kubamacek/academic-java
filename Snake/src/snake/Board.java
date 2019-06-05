@@ -33,9 +33,7 @@ public class Board extends JFrame {
 	private JButton btnStart = new JButton("Start");
 	private static Snake snake = new Snake();
 	private ArrayList<Food> foods = new ArrayList<>();
-	private JPanel contentPane = new JPanel();
-//	private static StringBuilder direction = new StringBuilder ();
-	
+	private JPanel contentPane = new JPanel();	
 	
 	private Timer timer = new Timer();
 	private TimerTask taskSnake = new TimerTask() {
@@ -125,10 +123,13 @@ public class Board extends JFrame {
 			if (!food.isEasten() && (Service.isInsideBox(pointSnake.x, pointSnake.y, loc, dimFood) ||
 				Service.isInsideBox(pointSnake.x + dimSnake.width, pointSnake.y, loc, dimFood) ||
 				Service.isInsideBox(pointSnake.x, pointSnake.y + dimSnake.height, loc, dimFood) || 
-				Service.isInsideBox(pointSnake.x + dimSnake.width, pointSnake.y + dimSnake.height, loc, dimFood))) {
+				Service.isInsideBox(pointSnake.x + dimSnake.width, pointSnake.y + dimSnake.height, loc, dimFood) ||
+				Service.isInsideBox(pointSnake.x + Config.segmentSize/2, pointSnake.y, loc, dimFood) ||
+				Service.isInsideBox(pointSnake.x + dimSnake.width, pointSnake.y + Config.segmentSize/2, loc, dimFood) ||
+				Service.isInsideBox(pointSnake.x, pointSnake.y + Config.segmentSize/2, loc, dimFood) || 
+				Service.isInsideBox(pointSnake.x + Config.segmentSize/2, pointSnake.y + dimSnake.height, loc, dimFood))) {
 				reached = food.getValue();
 				food.setEaten();
-//				food.removeLabel(contentPane);
 				snake.push(food);
 			}
 		}

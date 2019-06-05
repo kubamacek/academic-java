@@ -117,25 +117,22 @@ public class Snake {
 		switch (dir) {
 			case "right": {
 				food.setLocation(seg.getLocation().x - Config.segmentSize, seg.getLocation().y);
-				food.setDirection(dir);
-				body.add(food);
 			} break;
 			case "left": {
 				food.setLocation(seg.getLocation().x + Config.segmentSize, seg.getLocation().y);
-				food.setDirection(dir);
-				body.add(food);
 			} break;
 			case "down": {
 				food.setLocation(seg.getLocation().x, seg.getLocation().y - Config.segmentSize);
-				food.setDirection(dir);
-				body.add(food);
 			} break;
 			case "up": {
 				food.setLocation(seg.getLocation().x, seg.getLocation().y + Config.segmentSize);
-				food.setDirection(dir);
-				body.add(food);
 			} break;
 		}
+		food.setDirection(dir);
+		for (Point point : seg.intersections) {
+			food.intersections.add(point);
+		}
+		body.add(food);
 	}
 	
 	public boolean isOppositeDir(String key) {
