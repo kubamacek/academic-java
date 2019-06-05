@@ -149,12 +149,12 @@ public class Snake {
 	}
 	
 	public boolean checkCollisionWithBody() {
-		boolean collison = false;
-		for (Segment seg : body) {
-			if (Service.isInsideBox(seg.getLocation().x, seg.getLocation().y, head.getLocation(), head.getSize()))
-			 return true;
+		for (int i = 1; i < body.size(); i++) {
+			if (Service.isInsideBox(head.getLocation().x, head.getLocation().y, body.get(i).getLocation(), body.get(i).getSize())) {
+				return true;
+			}
 		}
 		
-		return collison;
+		return false;
 	}
 }

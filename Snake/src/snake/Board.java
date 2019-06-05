@@ -97,6 +97,9 @@ public class Board extends JFrame {
 			btnStart.setVisible(true);
 			lblPoints.setVisible(true);
 			pointsLabel.setVisible(true);
+			for (Food food : foods) {
+				food.removeLabel(contentPane);
+			}
 			snake.setDirection("");
 			snake.draw(contentPane);
 			snake.reset();
