@@ -3,6 +3,7 @@ package snake;
 import java.awt.Color;
 import java.awt.Dimension;
 import java.awt.Point;
+import java.util.ArrayList;
 
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -10,6 +11,8 @@ import javax.swing.JPanel;
 public class Segment {
 	public JLabel square = new JLabel("");
 	public Color color = Color.RED;
+	public String direction = "";
+	public ArrayList<Point> intersections = new ArrayList<>();
 	
 	public void draw(JPanel pane, int x, int y) {
 		square.setOpaque(true);
@@ -17,6 +20,14 @@ public class Segment {
 		square.setBounds(x, y, Config.segmentSize, Config.segmentSize);
 		pane.add(square);
 		pane.repaint();
+	}
+	
+	public void setDirection(String dir) {
+		direction = dir;
+	}
+	
+	public String getDirection() {
+		return direction;
 	}
 	
 	public void removeLabel(JPanel pane) {

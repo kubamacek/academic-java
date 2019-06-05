@@ -4,33 +4,20 @@ import java.awt.event.KeyEvent;
 import java.awt.event.KeyListener;
 
 public class Movement implements KeyListener {
-	private StringBuilder direction = new StringBuilder("");
+	private Snake snake = new Snake();
 	
-	public void setDirection(StringBuilder dir) {
+	public void setDirection(Snake s) {
 		// to pass by reference
-		direction = dir;
+		snake = s;
 	}
 	
 	public void keyPressed(KeyEvent k) {
 		final String key = k.getKeyText(k.getKeyCode());
-		direction.setLength(0);
-		switch (key) {
-			case "Up": {
-				direction.append("up");
-			}break;
-			case "Down": {
-				direction.append("down");
-			}break;
-			case "Right": {
-				direction.append("right");
-			}break;
-			case "Left": {
-				direction.append("left");
-			}break;
-			case "Esc": {
-				System.out.println("Escape");
-			}break;
-		}
+		if (snake.getDirection() != key.toLowerCase()) 
+			snake.setIntersections();
+		
+//		System.out.println(snake.isOppositeDir(key.toLowerCase()));
+		if (!snake.isOppositeDir(key.toLowerCase())) snake.setDirection(key.toLowerCase());
 	}
 	
 	public void keyTyped(KeyEvent k) {
